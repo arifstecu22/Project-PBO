@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Admin - Toko Kue Jihan</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', sans-serif;
+        }
+        
+        body {
+            background: #f4f6f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        
+        .auth-box {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        h2 {
+            color: #8B4513;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .sub {
+            text-align: center;
+            color: #666;
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+            font-weight: bold;
+        }
+        
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px;
+            border: none;
+            background: #8B4513;
+            color: white;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        button:hover {
+            background: #A0522D;
+        }
+        
+        .back-home {
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .back-home a {
+            color: #666;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        
+        .error-msg {
+            color: red;
+            font-size: 0.85rem;
+            margin-top: 5px;
+            display: none;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="auth-box">
+        <h2>🔐 Khusus Admin</h2>
+        <div class="sub">Sistem Manajemen Terintegrasi (Arif, Bintang, Rafly)</div>
+
+        <form id="adminLoginForm" onsubmit="validasiAdmin(event)">
+            <div class="form-group">
+                <label>Nama / ID Admin</label>
+                <input type="text" id="adminName" placeholder="Masukkan nama (Arif/Rafly/Bintang)..." required>
+            </div>
+            <div class="form-group">
+                <label>Password Admin</label>
+                <input type="password" id="adminPassword" placeholder="Masukkan password admin..." required>
+            </div>
+            <div class="error-msg" id="errorBlock">Nama Admin atau Password salah! ❌</div>
+            <button type="submit">Otorisasi & Masuk</button>
+        </form>
+
+        <div class="back-home">
+            <a href="/bakery">⬅️ Kembali ke Dashboard Utama</a>
+        </div>
+    </div>
+
+    <script>
+        function validasiAdmin(event) {
+            event.preventDefault(); // Mencegah form reload otomatis
+
+            let namaInput = document.getElementById("adminName").value.trim().toLowerCase();
+            let passwordInput = document.getElementById("adminPassword").value;
+            let errorBlock = document.getElementById("errorBlock");
+
+            // Daftar admin resmi & password tiruan (silakan sesuaikan password-nya jika mau)
+            let adminTerdaftar = ["arif", "rafly", "bintang"];
+            let passwordBenar = "admin123";
+
+            if (adminTerdaftar.includes(namaInput) && passwordInput === passwordBenar) {
+                errorBlock.style.display = "none";
+                alert("Akses diterima! Selamat bekerja, Admin " + namaInput.toUpperCase() + " ✨");
+                // Alihkan langsung ke halaman dashboard admin Spring Boot
+                window.location.href = "/bakery/admin";
+            } else {
+                errorBlock.style.display = "block";
+            }
+        }
+    </script>
+
+</body>
+
+</html>
