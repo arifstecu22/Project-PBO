@@ -313,12 +313,96 @@
         .btn-bayar-sekarang:hover {
             background: #006400;
         }
+
+        /* --- STYLE BARU UNTUK POP-UP MODAL NOTIFIKASI DI TENGAH --- */
+        .notif-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(4px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .notif-box {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            max-width: 380px;
+            width: 85%;
+            transform: scale(0.7);
+            transition: transform 0.3s ease;
+        }
+
+        .notif-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .notif-overlay.active .notif-box {
+            transform: scale(1);
+        }
+
+        .notif-icon {
+            font-size: 3rem;
+            margin-bottom: 12px;
+            display: inline-block;
+        }
+
+        .notif-icon.bounce {
+            animation: popBounce 0.5s ease;
+        }
+
+        .notif-box h3 {
+            color: #2C1A10;
+            margin-bottom: 8px;
+            font-size: 1.3rem;
+        }
+
+        .notif-box p {
+            color: #666;
+            font-size: 0.95rem;
+            line-height: 1.5;
+            white-space: pre-line; /* Agar karakter \n terbaca baris baru */
+        }
+
+        .btn-notif-close {
+            margin-top: 18px;
+            width: 100%;
+            padding: 10px;
+            background: #8B4513;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-notif-close:hover {
+            background: #A0522D;
+        }
+
+        @keyframes popBounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-12px); }
+        }
     </style>
 </head>
 
 <body>
     <nav>
-        <div class="logo">🍪 JIHAN COOKIES</div>
+        <div class="logo"> JIHAN COOKIES</div>
         <div class="nav-links">
             <a href="/bakery/katalog">Katalog Utama</a>
             <div class="btn-cart" onclick="bukaKeranjang()">🛒 Keranjang <span class="cart-count" id="totalItem">0</span></div>
@@ -363,23 +447,68 @@
             <button class="btn-bayar-sekarang" onclick="prosesPembayaran()">🔒 Konfirmasi & Bayar Sekarang</button>
         </div>
     </div>
+
+    <!-- STRUKTUR HTML BARU UNTUK KUSTOM POP-UP NOTIFIKASI -->
+    <div class="notif-overlay" id="customNotif">
+        <div class="notif-box">
+            <div class="notif-icon" id="notifIcon">✨</div>
+            <h3 id="notifTitle">Notifikasi</h3>
+            <p id="notifMessage">Pesan disini...</p>
+            <button class="btn-notif-close" id="btnNotifClose" onclick="tutupNotif()">Oke, Mengerti</button>
+        </div>
+    </div>
+
     <script>
         let keranjang = [];
         let metodeTerpilih = '';
+
+        // Fungsi pembantu baru untuk memicu pop-up keren di tengah layar
+        function tampilkanNotif(judul, pesan, icon, warnaIcon, autoClose = false) {
+            let overlay = document.getElementById('customNotif');
+            let elTitle = document.getElementById('notifTitle');
+            let elMsg = document.getElementById('notifMessage');
+            let elIcon = document.getElementById('notifIcon');
+            let elBtn = document.getElementById('btnNotifClose');
+
+            elTitle.innerText = judul;
+            elMsg.innerText = pesan;
+            elIcon.innerText = icon;
+            elTitle.style.color = warnaIcon;
+
+            // Efek membal pada icon saat muncul
+            elIcon.classList.remove('bounce');
+            void elIcon.offsetWidth; 
+            elIcon.classList.add('bounce');
+
+            if (autoClose) {
+                elBtn.style.display = 'none'; // Sembunyikan tombol jika menutup otomatis
+                overlay.classList.add('active');
+                setTimeout(tutupNotif, 2500); // Otomatis menutup dalam 2.5 detik
+            } else {
+                elBtn.style.display = 'block';
+                overlay.classList.add('active');
+            }
+        }
+
+        function tutupNotif() {
+            document.getElementById('customNotif').classList.remove('active');
+        }
 
         function tambahKeKeranjang(nama, harga) {
             let item = keranjang.find(k => k.nama === nama);
             if (item) {
                 item.jumlah++;
             } else {
-                keranjang.push({
+                key = keranjang.push({
                     nama: nama,
                     harga: harga,
                     jumlah: 1
                 });
             }
             updateBadge();
-            alert("Berhasil menambahkan " + nama + " ke keranjang!");
+            
+            // Mengganti alert() tambah keranjang menjadi modal otomatis menutup
+            tampilkanNotif("Berhasil!", `"${nama}" telah dimasukkan ke dalam keranjang pesanan.`, "🛒", "#8B4513", true);
         }
 
         function updateBadge() {
@@ -418,24 +547,28 @@
 
         function prosesPembayaran() {
             if (keranjang.length === 0) {
-                alert("Keranjang kosong!");
+                tampilkanNotif("Keranjang Kosong", "Silakan tambahkan produk kue terlebih dahulu sebelum melakukan pembayaran.", "❌", "#d9534f");
                 return;
             }
             if (!metodeTerpilih) {
-                alert("Pilih metode pembayaran!");
+                tampilkanNotif("Pilih Metode", "Kamu belum memilih metode pembayaran online.", "⚠️", "#A0522D");
                 return;
             }
+            
+            tutupKeranjang();
+
             if (metodeTerpilih === 'QRIS') {
-                alert("✨ [SIMULASI QRIS SUKSES]\n\nSistem berhasil membuat kode QRIS Toko Kue Jihan.");
+                tampilkanNotif("Simulasi QRIS Sukses", "Sistem berhasil membuat kode QRIS otomatis untuk Toko Kue Jihan.\n\nSilakan selesaikan pembayaran Anda.", "✨", "#228B22");
             } else {
-                alert("✨ [SIMULASI VIRTUAL ACCOUNT SUKSES]\n\nNomor VA Mandiri/BCA Anda: 8830182940182");
+                tampilkanNotif("Simulasi VA Sukses", "Nomor Virtual Account Mandiri/BCA Anda:\n\n8830182940182\n\nSilakan lakukan transfer antar bank.", "🏦", "#228B22");
             }
+
+            // Reset status transaksi
             keranjang = [];
             metodeTerpilih = '';
             document.getElementById('methodQRIS').classList.remove('active');
             document.getElementById('methodVA').classList.remove('active');
             updateBadge();
-            tutupKeranjang();
         }
     </script>
 </body>
