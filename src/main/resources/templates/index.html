@@ -226,7 +226,7 @@
         <div class="form-container">
             <h2 id="judulForm">Tambah Produk Roti Baru</h2>
             <form th:action="@{/bakery/simpan}" method="POST">
-                <input type="hidden" id="formId" name="idProdukStr">
+                <input type="hidden" id="formId" name="idProdukStr" value="">
                 <div class="form-group">
                     <label for="formNama">Nama Roti / Kue</label>
                     <input type="text" id="formNama" name="namaProduk" placeholder="Masukkan nama kue..." required>

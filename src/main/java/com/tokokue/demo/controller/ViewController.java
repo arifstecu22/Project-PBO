@@ -79,18 +79,17 @@ public class ViewController {
         }
     }
 
-// 2. PROSES DAFTAR AKUN PELANGGAN BARU (Gunakan Setter agar Pasti Masuk ke Kolom yang Benar)
+    // 2. PROSES DAFTAR AKUN PELANGGAN BARU (Diperbaiki: ID dibiarkan auto-generate oleh JPA/Database)
     @PostMapping("/bakery/api/register")
     public String daftarPelanggan(@RequestParam String nama, 
                                   @RequestParam String email, 
                                   @RequestParam String password) {
         try {
-            // Gunakan konstruktor kosong, lalu isi satu per satu dengan Setter manual
             Pelanggan pelanggan = new Pelanggan();
-            pelanggan.setId(0);
+            // JANGAN di-set id(0) manual agar strateginya menggunakan Auto-Increment bawaan database
             pelanggan.setNama(nama);
-            pelanggan.setEmail(email.trim());       // .trim() untuk menghapus spasi tidak sengaja
-            pelanggan.setPassword(password.trim()); // .trim() untuk menghapus spasi tidak sengaja
+            pelanggan.setEmail(email.trim());       
+            pelanggan.setPassword(password.trim()); 
             pelanggan.setNoHp("Belum diisi");
             pelanggan.setAlamat("Belum diisi");
             
@@ -103,25 +102,21 @@ public class ViewController {
         }
     }
 
-    // 3. PROSES LOGIN PELANGGAN (Gunakan .trim() dan .equals() yang Aman)
+    // 3. PROSES LOGIN PELANGGAN 
     @PostMapping("/bakery/api/login")
     public String prosesLoginPelanggan(@RequestParam String email, 
                                        @RequestParam String password, 
                                        Model model) {
         try {
-            // Cari berdasarkan email yang di-trim (tanpa spasi luar)
             Optional<Pelanggan> pelangganOpt = pelangganRepository.findByEmail(email.trim());
             
             if (pelangganOpt.isPresent()) {
                 Pelanggan dbPelanggan = pelangganOpt.get();
-                
-                // Ambil password asli dari database dan bandingkan dengan input user
                 if (dbPelanggan.getPassword().equals(password.trim())) {
-                    return "redirect:/bakery/katalog"; // Sukses, langsung masuk katalog kue
+                    return "redirect:/bakery/katalog"; 
                 }
             }
             
-            // Jika salah password atau email tidak ada
             model.addAttribute("loginError", true);
             return "login-pelanggan";
             
@@ -145,18 +140,27 @@ public class ViewController {
         return "pelanggan"; 
     }
 
-    @PostMapping("/bakery/simpan")
-    public String simpan(@ModelAttribute Produk produk, @RequestParam(value = "idProdukStr", required = false) String idProdukStr) {
-        if (idProdukStr == null || idProdukStr.trim().isEmpty()) {
-            produk.setIdProduk(0); 
-        } else {
-            try {
-                produk.setIdProduk(Integer.parseInt(idProdukStr));
-            } catch (NumberFormatException e) {
-                produk.setIdProduk(0);
-            }
+@PostMapping("/bakery/simpan")
+    public String simpan(@RequestParam(value = "idProdukStr", required = false) String idProdukStr,
+                         @RequestParam("namaProduk") String namaProduk,
+                         @RequestParam("harga") int harga,
+                         @RequestParam("stok") int stok) {
+        try {
+            Produk produk = new Produk();
+            if (idProdukStr != null && !idProdukStr.trim().isEmpty()) {
+                produk.setIdProduk(Integer.parseInt(idProdukStr.trim()));
+            } 
+            produk.setNamaProduk(namaProduk);
+            produk.setHarga(harga);
+            produk.setStok(stok);
+            
+            produkService.simpanProduk(produk);
+            System.out.println("LOG: Berhasil simpan " + namaProduk);
+            
+        } catch (Exception e) {
+            // SEMENTARA: Lempar error-nya keluar agar browser menampilkan pesan kesalahannya secara detail!
+            throw new RuntimeException("DATABASE MENOLAK DATA! Alasan: " + e.getMessage(), e);
         }
-        produkService.simpanProduk(produk);
         return "redirect:/bakery/admin"; 
     }
 
