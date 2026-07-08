@@ -4,32 +4,38 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
-import lombok.Data;
-import lombok.AllArgsConstructor;
-import lombok.NoArgsConstructor;
-import java.time.LocalDate; // Library tanggal yang lebih modern
+import java.time.LocalDate;
 
 @Entity
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class Pesanan {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int idPesanan;
-    
-    private LocalDate tanggalPesan; // Pengganti @Temporal Date
-    
+    private LocalDate tanggalPesan;
     private int totalHarga;
     private String status;
 
-    // Method sesuai dokumen analisis (Laporan Hlm 3 & 6)
+    public Pesanan() {}
+
     public void buatPesanan() {
-        this.tanggalPesan = LocalDate.now(); // Mengambil tanggal hari ini
+        this.tanggalPesan = LocalDate.now();
         this.status = "PENDING";
     }
 
     public void updateStatus(String statusBaru) {
         this.status = statusBaru;
     }
+
+    // --- GETTER & SETTER MANUAL ---
+    public int getIdPesanan() { return idPesanan; }
+    public void setIdPesanan(int idPesanan) { this.idPesanan = idPesanan; }
+
+    public LocalDate getTanggalPesan() { return tanggalPesan; }
+    public void setTanggalPesan(LocalDate tanggalPesan) { this.tanggalPesan = tanggalPesan; }
+
+    public int getTotalHarga() { return totalHarga; }
+    public void setTotalHarga(int totalHarga) { this.totalHarga = totalHarga; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 }
