@@ -5,6 +5,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.tokokue.demo.model.Pembayaran;
 import com.tokokue.demo.model.Pesanan;
@@ -15,6 +16,11 @@ import com.tokokue.demo.repository.PembayaranRepository;
 import com.tokokue.demo.repository.PesananRepository;
 import com.tokokue.demo.repository.PelangganRepository;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Map;
 import java.util.Optional;
 
@@ -48,7 +54,6 @@ public class ViewController {
         return "login-pelanggan"; 
     }
 
-    // 1. HUBUNGKAN TRANSAKSI PEMBELIAN & PEMBAYARAN KE DATABASE
     @PostMapping("/bakery/api/pembayaran")
     @ResponseBody 
     public ResponseEntity<?> simpanPembayaran(@RequestBody Map<String, Object> data) {
@@ -56,17 +61,15 @@ public class ViewController {
             int totalHarga = (int) data.get("totalHarga");
             String metode = (String) data.get("metode");
 
-            // Buat & simpan pesanan terlebih dahulu ke database
             Pesanan pesanan = new Pesanan();
             pesanan.buatPesanan();
             pesanan.setTotalHarga(totalHarga);
             Pesanan pesananSaved = pesananRepository.save(pesanan);
 
-            // Buat & simpan detail pembayaran ke database
             Pembayaran pembayaran = new Pembayaran();
             pembayaran.setMetode(metode);
             pembayaran.setJumlahBayar(totalHarga);
-            pembayaran.prosesPembayaran(); // Otomatis status jadi SUCCESS
+            pembayaran.prosesPembayaran(); 
             Pembayaran pembayaranSaved = pembayaranRepository.save(pembayaran);
 
             return ResponseEntity.ok(Map.of(
@@ -79,14 +82,12 @@ public class ViewController {
         }
     }
 
-    // 2. PROSES DAFTAR AKUN PELANGGAN BARU (Diperbaiki: ID dibiarkan auto-generate oleh JPA/Database)
     @PostMapping("/bakery/api/register")
     public String daftarPelanggan(@RequestParam String nama, 
                                   @RequestParam String email, 
                                   @RequestParam String password) {
         try {
             Pelanggan pelanggan = new Pelanggan();
-            // JANGAN di-set id(0) manual agar strateginya menggunakan Auto-Increment bawaan database
             pelanggan.setNama(nama);
             pelanggan.setEmail(email.trim());       
             pelanggan.setPassword(password.trim()); 
@@ -102,7 +103,6 @@ public class ViewController {
         }
     }
 
-    // 3. PROSES LOGIN PELANGGAN 
     @PostMapping("/bakery/api/login")
     public String prosesLoginPelanggan(@RequestParam String email, 
                                        @RequestParam String password, 
@@ -140,25 +140,69 @@ public class ViewController {
         return "pelanggan"; 
     }
 
-@PostMapping("/bakery/simpan")
+    @PostMapping("/bakery/simpan")
     public String simpan(@RequestParam(value = "idProdukStr", required = false) String idProdukStr,
                          @RequestParam("namaProduk") String namaProduk,
                          @RequestParam("harga") int harga,
-                         @RequestParam("stok") int stok) {
+                         @RequestParam("stok") int stok,
+                         @RequestParam("fileGambar") MultipartFile fileGambar) {
         try {
             Produk produk = new Produk();
+            boolean isEdit = false;
+
             if (idProdukStr != null && !idProdukStr.trim().isEmpty()) {
                 produk.setIdProduk(Integer.parseInt(idProdukStr.trim()));
+                isEdit = true;
             } 
             produk.setNamaProduk(namaProduk);
             produk.setHarga(harga);
             produk.setStok(stok);
             
-            produkService.simpanProduk(produk);
-            System.out.println("LOG: Berhasil simpan " + namaProduk);
+            if (fileGambar != null && !fileGambar.isEmpty()) {
+                String userDir = System.getProperty("user.dir");
+                Path pathFolder = Paths.get(userDir, "src", "main", "resources", "static", "images");
+                
+                if (!Files.exists(pathFolder)) {
+                    Files.createDirectories(pathFolder);
+                }
+                
+                String ekstensi = ".jpg";
+                String namaAsli = fileGambar.getOriginalFilename();
+                if (namaAsli != null && namaAsli.contains(".")) {
+                    ekstensi = namaAsli.substring(namaAsli.lastIndexOf("."));
+                }
+                String namaFileBersih = namaProduk.toLowerCase().replaceAll("[^a-zA-Z0-9]", "_") + ekstensi;
+                
+                // DISINI SUDAH DISATUKAN TANPA SPASI
+                Path pathFileLengkap = pathFolder.resolve(namaFileBersih);
+                Files.copy(fileGambar.getInputStream(), pathFileLengkap, StandardCopyOption.REPLACE_EXISTING);
+                
+                produk.setGambar("/images/" + namaFileBersih);
+            } else {
+                if (isEdit) {
+                    Produk produkLama = produkService.ambilSemuaProduk().stream()
+                            .filter(p -> p.getIdProduk() == produk.getIdProduk())
+                            .findFirst().orElse(null);
+                    if (produkLama != null && produkLama.getGambar() != null) {
+                        produk.setGambar(produkLama.getGambar());
+                    } else {
+                        produk.setGambar("/images/default-kue.jpg");
+                    }
+                } else {
+                    produk.setGambar("/images/default-kue.jpg");
+                }
+            }
             
+            produkService.simpanProduk(produk);
+            System.out.println("LOG: Berhasil menyimpan produk " + namaProduk);
+            
+        } catch (IOException e) {
+            System.out.println("EROR IO: Gagal menyalin file fisik gambar -> " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("Gagal menulis berkas gambar: " + e.getMessage(), e);
         } catch (Exception e) {
-            // SEMENTARA: Lempar error-nya keluar agar browser menampilkan pesan kesalahannya secara detail!
+            System.out.println("EROR DATABASE: " + e.getMessage());
+            e.printStackTrace();
             throw new RuntimeException("DATABASE MENOLAK DATA! Alasan: " + e.getMessage(), e);
         }
         return "redirect:/bakery/admin"; 
