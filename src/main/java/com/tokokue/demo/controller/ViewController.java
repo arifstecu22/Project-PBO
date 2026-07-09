@@ -54,18 +54,45 @@ public class ViewController {
         return "login-pelanggan"; 
     }
 
-    @PostMapping("/bakery/api/pembayaran")
+@PostMapping("/bakery/api/pembayaran")
     @ResponseBody 
+    @org.springframework.transaction.annotation.Transactional // Ditambahkan agar potong stok aman jika terjadi eror
     public ResponseEntity<?> simpanPembayaran(@RequestBody Map<String, Object> data) {
         try {
             int totalHarga = (int) data.get("totalHarga");
             String metode = (String) data.get("metode");
+            java.util.List<Map<String, Object>> itemBelanja = (java.util.List<Map<String, Object>>) data.get("itemBelanja");
 
+            // 1. Validasi stok semua produk terlebih dahulu sebelum memotong
+            if (itemBelanja != null) {
+                for (Map<String, Object> item : itemBelanja) {
+                    String namaKue = (String) item.get("nama");
+                    int jumlahBeli = (int) item.get("jumlah");
+
+                    // Cari produk berdasarkan nama produk di DB
+                    Produk produk = produkService.ambilSemuaProduk().stream()
+                            .filter(p -> p.getNamaProduk().equalsIgnoreCase(namaKue))
+                            .findFirst()
+                            .orElseThrow(() -> new IllegalArgumentException("Produk " + namaKue + " tidak ditemukan!"));
+
+                    // Cek stok cukup atau tidak
+                    if (produk.getStok() < jumlahBeli) {
+                        return ResponseEntity.badRequest().body("Transaksi gagal! Stok kue '" + namaKue + "' tidak mencukupi (Sisa stok: " + produk.getStok() + ").");
+                    }
+
+                    // Potong stok dan simpan perubahan ke database produk
+                    produk.setStok(produk.getStok() - jumlahBeli);
+                    produkService.simpanProduk(produk);
+                }
+            }
+
+            // 2. Simpan Data Pesanan
             Pesanan pesanan = new Pesanan();
             pesanan.buatPesanan();
             pesanan.setTotalHarga(totalHarga);
             Pesanan pesananSaved = pesananRepository.save(pesanan);
 
+            // 3. Simpan Data Pembayaran
             Pembayaran pembayaran = new Pembayaran();
             pembayaran.setMetode(metode);
             pembayaran.setJumlahBayar(totalHarga);

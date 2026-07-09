@@ -1,3 +1,3 @@
-INSERT INTO produk (harga, nama_produk, stok, gambar) VALUES (50000, 'nastar', 15, 'https://images.unsplash.com/photo-1619176100231-ad69b596d67e?q=80&w=400');
-INSERT INTO produk (harga, nama_produk, stok, gambar) VALUES (39000, 'putri salju', 20, 'https://images.unsplash.com/photo-1590080875515-8a3a8dc5735e?q=80&w=400');
-INSERT INTO produk (harga, nama_produk, stok, gambar) VALUES (40000, 'kue kacang', 12, 'https://images.unsplash.com/photo-1558961317-19df1ba79815?q=80&w=400');
+INSERT INTO produk (id, nama_produk, harga, stok, gambar) VALUES (1, 'nastar', 50000, 15, 'static/images/nastar.png');
+INSERT INTO produk (id, nama_produk, harga, stok, gambar) VALUES (2, 'putri salju', 39000, 20, 'static/images/putri_salju.jpg');
+INSERT INTO produk (id, nama_produk, harga, stok, gambar) VALUES (3, 'kue kacang', 40000, 12, 'static/images/kue_kacang.jpg');

@@ -457,9 +457,10 @@
         </div>
     </div>
 
-    <script>
+<script>
         let keranjang = [];
         let metodeTerpilih = '';
+        let butuhRefresh = false; // <-- Indikator apakah halaman perlu di-refresh atau tidak
 
         function tampilkanNotif(judul, pesan, icon, warnaIcon, autoClose = false) {
             let overlay = document.getElementById('customNotif');
@@ -489,6 +490,11 @@
 
         function tutupNotif() {
             document.getElementById('customNotif').classList.remove('active');
+            
+            // JIKA habis bayar sukses, baru halaman akan di-refresh
+            if (butuhRefresh) {
+                window.location.reload();
+            }
         }
 
         function tambahKeKeranjang(nama, harga) {
@@ -496,13 +502,15 @@
             if (item) {
                 item.jumlah++;
             } else {
-                keranjang.push({
+                canvas = keranjang.push({
                     nama: nama,
                     harga: harga,
                     jumlah: 1
                 });
             }
             updateBadge();
+            // Saat tambah barang, butuhRefresh tetap false (jadi keranjang AMAN dan GA ILANG)
+            butuhRefresh = false; 
             tampilkanNotif("Berhasil!", `"${nama}" telah dimasukkan ke dalam keranjang pesanan.`, "🛒", "#8B4513", true);
         }
 
@@ -542,10 +550,12 @@
 
         function prosesPembayaran() {
             if (keranjang.length === 0) {
+                butuhRefresh = false;
                 tampilkanNotif("Keranjang Kosong", "Silakan tambahkan produk kue terlebih dahulu sebelum melakukan pembayaran.", "❌", "#d9534f");
                 return;
             }
             if (!metodeTerpilih) {
+                butuhRefresh = false;
                 tampilkanNotif("Pilih Metode", "Kamu belum memilih metode pembayaran online.", "⚠️", "#A0522D");
                 return;
             }
@@ -560,7 +570,8 @@
                 },
                 body: JSON.stringify({
                     totalHarga: totalHarga,
-                    metode: metodeTerpilih
+                    metode: metodeTerpilih,
+                    itemBelanja: keranjang
                 })
             })
             .then(response => {
@@ -571,6 +582,9 @@
             })
             .then(data => {
                 if (data.success) {
+                    // SET JADI TRUE: Karena transaksi sukses, halaman wajib refresh pas pop-up ditutup
+                    butuhRefresh = true;
+
                     if (metodeTerpilih === 'QRIS') {
                         tampilkanNotif("QRIS Sukses (ID: " + data.idPembayaran + ")", "Sistem berhasil membuat kode QRIS otomatis untuk Toko Kue Jihan.\n\nSilakan selesaikan pembayaran Anda.", "✨", "#228B22");
                     } else {
@@ -583,15 +597,16 @@
                     document.getElementById('methodVA').classList.remove('active');
                     updateBadge();
                 } else {
+                    butuhRefresh = false;
                     tampilkanNotif("Transaksi Gagal", "Server menolak permintaan pembelian ini.", "❌", "#d9534f");
                 }
             })
             .catch(error => {
+                butuhRefresh = false;
                 tampilkanNotif("Error Database", "Gagal terhubung ke database. Pastikan aplikasi Spring Boot Anda berjalan dengan normal.", "❌", "#d9534f");
                 console.error("Detail Error:", error);
             });
         }
     </script>
 </body>
-
 </html>
