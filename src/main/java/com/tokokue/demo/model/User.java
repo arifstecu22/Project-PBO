@@ -7,7 +7,8 @@ import jakarta.persistence.*;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    protected int id;
+    protected Integer id; // Ubah dari 'int' ke 'Integer' agar bisa bernilai null jika data baru
+
     protected String nama;
     protected String email;
     protected String password;
@@ -17,7 +18,7 @@ public class User {
     public User() {}
 
     // Konstruktor Manual
-    public User(int id, String nama, String email, String password, String noHp) {
+    public User(Integer id, String nama, String email, String password, String noHp) {
         this.id = id;
         this.nama = nama;
         this.email = email;
@@ -25,9 +26,9 @@ public class User {
         this.noHp = noHp;
     }
 
-    // --- GETTER & SETTER MANUAL (Menjamin Nilai Bisa Dibaca Saat Login) ---
-    public int getId() { return id; }
-    public void setId(int id) { this.id = id; }
+    // --- GETTER & SETTER MANUAL ---
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
 
     public String getNama() { return nama; }
     public void setNama(String nama) { this.nama = nama; }

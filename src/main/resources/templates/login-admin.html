@@ -195,38 +195,53 @@
         </div>
     </div>
 
-    <script>
-        function validasiAdmin(event) {
-            event.preventDefault(); // Mencegah form reload otomatis
+<script>
+    function validasiAdmin(event) {
+        event.preventDefault(); // Mencegah form reload otomatis
 
-            let namaInput = document.getElementById("adminName").value.trim().toLowerCase();
-            let passwordInput = document.getElementById("adminPassword").value;
-            let errorBlock = document.getElementById("errorBlock");
+        let namaInput = document.getElementById("adminName").value.trim();
+        let passwordInput = document.getElementById("adminPassword").value;
+        let errorBlock = document.getElementById("errorBlock");
 
-            // Daftar admin resmi & password tiruan
-            let adminTerdaftar = ["arif", "rafly", "bintang"];
-            let passwordBenar = "admin123";
-
-            if (adminTerdaftar.includes(namaInput) && passwordInput === passwordBenar) {
+        // Menghubungkan frontend ke backend REST Controller
+        fetch('/bakery/api/admin/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                username: namaInput,
+                password: passwordInput
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
                 errorBlock.style.display = "none";
                 
-                // Masukkan teks kustom ke dalam modal
+                // Tampilkan nama admin di modal sukses
                 document.getElementById("welcomeMessage").innerText = "Selamat bekerja, Admin " + namaInput.toUpperCase() + " ✨\nSistem sedang menyiapkan data...";
                 
-                // Memunculkan pop-up modal keren dengan efek transisi
                 let modal = document.getElementById("successModal");
                 modal.classList.add("active");
 
-                // Memberikan jeda waktu 2 detik agar user bisa melihat animasi pop-up sebelum dilempar ke dashboard admin
+                // Jeda 2 detik sebelum masuk ke dashboard admin
                 setTimeout(function() {
                     window.location.href = "/bakery/admin";
                 }, 2000);
-
             } else {
+                // Jika data.message ada, pakai data.message. Jika tidak ada, pakai pesan default.
+                errorBlock.innerText = data && data.message ? data.message : "Nama Admin atau Password salah! ❌";
                 errorBlock.style.display = "block";
             }
-        }
-    </script>
+        })
+        .catch(error => {
+            errorBlock.innerText = "Gagal terhubung ke server! ❌";
+            errorBlock.style.display = "block";
+            console.error("Error:", error);
+        });
+    }
+</script>
 
 </body>
 
