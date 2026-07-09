@@ -4,11 +4,11 @@ Aplikasi manajemen **toko kue online** berbasis web yang dibangun dengan **Sprin
 
 Proyek ini dibuat untuk memenuhi tugas mata kuliah **Pemrograman Berorientasi Objek (PBO)**.
 
-> **Kelompok:** *(isi nama kelompok)*
+> **Kelompok:** *()*
 > **Anggota:**
-> - *(Nama Mahasiswa 1 - NIM)*
-> - *(Nama Mahasiswa 2 - NIM)*
-> - *(Nama Mahasiswa 3 - NIM)*
+> - *(Bintang Wafii Al-Farisi - 41524010181)*
+> - *(Arif Suryo Utomo - 41524010150)*
+> - *(Rafly Prasetya Romahdoni - 41524010122)*
 
 ---
 
