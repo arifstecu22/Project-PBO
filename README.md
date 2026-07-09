@@ -1,41 +1,44 @@
-Toko Kue Jihan
+# Toko Kue Jihan
 
-Aplikasi manajemen toko kue online berbasis web yang dibangun dengan Spring Boot, Thymeleaf, dan H2 Database. Aplikasi ini menyediakan dashboard untuk Admin dalam mengelola produk, serta katalog belanja untuk Pelanggan lengkap dengan proses pemesanan dan pembayaran.
+Aplikasi manajemen **toko kue online** berbasis web yang dibangun dengan **Spring Boot**, **Thymeleaf**, dan **H2 Database**. Aplikasi ini menyediakan dashboard untuk Admin dalam mengelola produk, serta katalog belanja untuk Pelanggan lengkap dengan proses pemesanan dan pembayaran.
 
-Proyek ini dibuat untuk memenuhi tugas mata kuliah Pemrograman Berorientasi Objek (PBO).
+Proyek ini dibuat untuk memenuhi tugas mata kuliah **Pemrograman Berorientasi Objek (PBO)**.
 
+> **Kelompok:** *(isi nama kelompok)*
+> **Anggota:**
+> - *(Nama Mahasiswa 1 - NIM)*
+> - *(Nama Mahasiswa 2 - NIM)*
+> - *(Nama Mahasiswa 3 - NIM)*
 
-Kelompok: (isi nama kelompok)
-Anggota:
+---
 
+## Tech Stack
 
-(Nama Mahasiswa 1 - NIM)
-(Nama Mahasiswa 2 - NIM)
-(Nama Mahasiswa 3 - NIM)
+| Komponen      | Teknologi                          |
+| ------------- | ----------------------------------- |
+| Backend       | Spring Boot 4.0 / Java 25           |
+| Template View | Thymeleaf                           |
+| Database      | H2 Database (file-based)            |
+| ORM           | Spring Data JPA / Hibernate         |
+| Build Tool    | Maven                               |
+| Utilitas      | Lombok                              |
 
+---
 
+## Fitur Utama
 
+- **Login terpisah** untuk Admin dan Pelanggan
+- **Registrasi akun** Pelanggan baru
+- **CRUD Produk** (tambah, lihat, hapus) lengkap dengan upload gambar kue
+- **Katalog produk** untuk Pelanggan dengan info stok & harga
+- **Proses pemesanan & pembayaran** yang otomatis memotong stok produk
+- **H2 Console** untuk inspeksi database secara langsung
 
+---
 
-Tech Stack
+## Struktur Proyek
 
-KomponenTeknologiBackendSpring Boot 4.0 / Java 25Template ViewThymeleafDatabaseH2 Database (file-based)ORMSpring Data JPA / HibernateBuild ToolMavenUtilitasLombok
-
-
-Fitur Utama
-
-
-Login terpisah untuk Admin dan Pelanggan
-Registrasi akun Pelanggan baru
-CRUD Produk (tambah, lihat, hapus) lengkap dengan upload gambar kue
-Katalog produk untuk Pelanggan dengan info stok & harga
-Proses pemesanan & pembayaran yang otomatis memotong stok produk
-H2 Console untuk inspeksi database secara langsung
-
-
-
-Struktur Proyek
-
+```
 src/main/java/com/tokokue/demo/
 ├── DemoApplication.java       # Entry point aplikasi
 ├── controller/
@@ -56,69 +59,95 @@ src/main/resources/
 ├── static/images/    # Gambar produk
 ├── application.properties
 └── import.sql        # Data awal (seed) produk & admin
+```
 
+---
 
-Cara Menjalankan
+## Cara Menjalankan
 
-1. Prasyarat
+### 1. Prasyarat
 
+- JDK 25+
+- Maven 3.8+ (atau gunakan `mvnw` yang sudah disertakan)
 
-JDK 25+
-Maven 3.8+ (atau gunakan mvnw yang sudah disertakan)
+### 2. Clone / Ekstrak Proyek
 
+```bash
+cd pbo
+```
 
-2. Clone / Ekstrak Proyek
+### 3. Jalankan Aplikasi
 
-bashcd pbo
+**Menggunakan Maven Wrapper (disarankan):**
 
-3. Jalankan Aplikasi
+```bash
+./mvnw spring-boot:run
+```
 
-Menggunakan Maven Wrapper (disarankan):
+**Windows:**
 
-bash./mvnw spring-boot:run
+```bash
+mvnw.cmd spring-boot:run
+```
 
-Windows:
+Aplikasi akan berjalan di **http://localhost:8080**
 
-bashmvnw.cmd spring-boot:run
+### 4. Build JAR (opsional)
 
-Aplikasi akan berjalan di http://localhost:8080
-
-4. Build JAR (opsional)
-
-bash./mvnw clean package
+```bash
+./mvnw clean package
 java -jar target/demo-0.0.1-SNAPSHOT.jar
+```
 
+---
 
-Halaman & Endpoint
+## Halaman & Endpoint
 
-RouteDeskripsiMethod/bakeryHalaman selamat datangGET/bakery/login-adminHalaman login AdminGET/bakery/login-pelangganHalaman login & daftar PelangganGET/bakery/adminDashboard Admin (kelola produk)GET/bakery/katalogKatalog produk untuk PelangganGET/bakery/simpanSimpan/edit produk (dengan gambar)POST/bakery/hapus/{id}Hapus produkGET/bakery/api/registerRegistrasi akun Pelanggan baruPOST/bakery/api/loginProses login PelangganPOST/bakery/api/admin/loginProses login Admin (REST)POST/bakery/api/pembayaranProses pesanan & pembayaranPOST/api/produkREST API daftar & tambah produkGET/POST
+| Route                        | Deskripsi                          | Method |
+| ----------------------------- | ----------------------------------- | ------ |
+| `/bakery`                     | Halaman selamat datang              | GET    |
+| `/bakery/login-admin`         | Halaman login Admin                 | GET    |
+| `/bakery/login-pelanggan`     | Halaman login & daftar Pelanggan    | GET    |
+| `/bakery/admin`                | Dashboard Admin (kelola produk)     | GET    |
+| `/bakery/katalog`             | Katalog produk untuk Pelanggan      | GET    |
+| `/bakery/simpan`              | Simpan/edit produk (dengan gambar)  | POST   |
+| `/bakery/hapus/{id}`          | Hapus produk                        | GET    |
+| `/bakery/api/register`        | Registrasi akun Pelanggan baru      | POST   |
+| `/bakery/api/login`           | Proses login Pelanggan              | POST   |
+| `/bakery/api/admin/login`     | Proses login Admin (REST)           | POST   |
+| `/bakery/api/pembayaran`      | Proses pesanan & pembayaran         | POST   |
+| `/api/produk`                 | REST API daftar & tambah produk     | GET/POST |
 
+---
 
-Akun Contoh (Seed Data)
+## Akun Contoh (Seed Data)
 
-Data berikut sudah otomatis ditambahkan lewat import.sql saat aplikasi pertama kali dijalankan:
+Data berikut sudah otomatis ditambahkan lewat `import.sql` saat aplikasi pertama kali dijalankan:
 
-Admin:
+**Admin:**
 
-NamaEmailPasswordArifarif@bakery.comadmin123Raflyrafly@bakery.comadmin123Bintangbintang@bakery.comadmin123
+| Nama    | Email                | Password  |
+| ------- | --------------------- | --------- |
+| Arif    | arif@bakery.com        | admin123  |
+| Rafly   | rafly@bakery.com       | admin123  |
+| Bintang | bintang@bakery.com     | admin123  |
 
-Produk Awal: Nastar, Putri Salju, Kue Kacang
+**Produk Awal:** Nastar, Putri Salju, Kue Kacang
 
+---
 
-Database (H2 Console)
+## Database (H2 Console)
 
 Untuk melihat isi database secara langsung:
 
+1. Jalankan aplikasi
+2. Buka **http://localhost:8080/h2-console**
+3. Gunakan JDBC URL: `jdbc:h2:file:./data/tokokuedb`
+4. Username: `sa`, Password: *(kosong)*
 
-Jalankan aplikasi
-Buka http://localhost:8080/h2-console
-Gunakan JDBC URL: jdbc:h2:file:./data/tokokuedb
-Username: sa, Password: (kosong)
+---
 
+## Catatan
 
-
-Catatan
-
-
-Data disimpan secara persisten di folder data/ (file H2), bukan in-memory, sehingga data tidak hilang saat aplikasi di-restart.
-Gambar produk yang diupload melalui dashboard Admin akan disimpan di src/main/resources/static/images/.
+- Data disimpan secara persisten di folder `data/` (file H2), bukan in-memory, sehingga data tidak hilang saat aplikasi di-restart.
+- Gambar produk yang diupload melalui dashboard Admin akan disimpan di `src/main/resources/static/images/`.
