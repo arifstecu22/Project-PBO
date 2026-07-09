@@ -189,7 +189,7 @@
     <!-- STRUKTUR HTML BARU UNTUK POP-UP MODAL -->
     <div class="modal-overlay" id="successModal">
         <div class="modal-box">
-            <div class="modal-icon">✨</div>
+            <div class="modal-icon">✅</div>
             <h3>Akses Diterima!</h3>
             <p id="welcomeMessage">Selamat bekerja, Admin!</p>
         </div>
@@ -220,7 +220,7 @@
                 errorBlock.style.display = "none";
                 
                 // Tampilkan nama admin di modal sukses
-                document.getElementById("welcomeMessage").innerText = "Selamat bekerja, Admin " + namaInput.toUpperCase() + " ✨\nSistem sedang menyiapkan data...";
+                document.getElementById("welcomeMessage").innerText = "Selamat bekerja, Admin " + namaInput.toUpperCase() + " \nSistem sedang menyiapkan data...";
                 
                 let modal = document.getElementById("successModal");
                 modal.classList.add("active");
